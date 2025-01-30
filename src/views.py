@@ -60,7 +60,8 @@ def get_cards_info(date) -> list:
 
     operations = pd.read_excel('data/operations.xlsx')
     operations['Дата операции'] = pd.to_datetime(operations['Дата операции'], format='%d.%m.%Y %H:%M:%S')
-    date_operations = operations.loc[(operations['Дата операции'] > date_start)]
+    date_operations = operations.loc[(operations['Дата операции'] > date_start)
+                                     & (operations['Дата операции'] < date_obj)]
     cards = operations['Номер карты'].unique()  # список всех карт
     print(date_operations['Дата операции'])
     return []
