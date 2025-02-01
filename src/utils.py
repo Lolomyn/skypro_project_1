@@ -1,82 +1,102 @@
 import datetime
 import json
 import os
-
+import logging
 import finnhub
 import pandas
 import pandas as pd
 import requests
-from dotenv import load_dotenv
+
+logger = logging.getLogger("utils")
+logger.setLevel(logging.DEBUG)
+file_handler = logging.FileHandler("logs/utils.log", "w")
+file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
+file_handler.setFormatter(file_formatter)
+logger.addHandler(file_handler)
 
 
 def get_greeting(date: str) -> str:
-    """Возвращает приветствие в зависимости от времени суток"""
+    """Р’РѕР·РІСЂР°С‰Р°РµС‚ РїСЂРёРІРµС‚СЃС‚РІРёРµ РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ РІСЂРµРјРµРЅРё СЃСѓС‚РѕРє"""
+    logger.info(f"РџРѕР»СѓС‡РµРЅР° РґР°С‚Р°: {date}")
     date_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-    hour = date_obj.hour  # час
+    hour = date_obj.hour  # С‡Р°СЃ
+    logger.info(f"РџРѕР»СѓС‡РµРЅР° С‡Р°СЃ РґР»СЏ РІС‹РІРѕРґР° РїСЂРёРІРµС‚СЃС‚РІРёСЏ: {hour}")
 
     if 6 <= hour < 12:
-        return "Доброе утро!"
+        logger.info(f"Р’РѕР·РІСЂР°С‰РµРЅРЅРѕРµ РїСЂРёРІРµС‚СЃС‚РІРёРµ: Р”РѕР±СЂРѕРµ СѓС‚СЂРѕ!")
+        return "Р”РѕР±СЂРѕРµ СѓС‚СЂРѕ!"
     elif 12 <= hour < 18:
-        return "Добрый день!"
+        logger.info(f"Р’РѕР·РІСЂР°С‰РµРЅРЅРѕРµ РїСЂРёРІРµС‚СЃС‚РІРёРµ: Р”РѕР±СЂС‹Р№ РґРµРЅСЊ!")
+        return "Р”РѕР±СЂС‹Р№ РґРµРЅСЊ!"
     elif 18 <= hour < 24:
-        return "Добрый вечер!"
+        logger.info(f"Р’РѕР·РІСЂР°С‰РµРЅРЅРѕРµ РїСЂРёРІРµС‚СЃС‚РІРёРµ: Р”РѕР±СЂС‹Р№ РІРµС‡РµСЂ!")
+        return "Р”РѕР±СЂС‹Р№ РІРµС‡РµСЂ!"
     else:
-        return "Доброй ночи!"
+        logger.info(f"Р’РѕР·РІСЂР°С‰РµРЅРЅРѕРµ РїСЂРёРІРµС‚СЃС‚РІРёРµ: Р”РѕР±СЂРѕР№ РЅРѕС‡Рё!")
+        return "Р”РѕР±СЂРѕР№ РЅРѕС‡Рё!"
 
 
 def get_cards_info(date: str) -> tuple:
-    """Возвращает инфорцию о картах и о топ транзакциях за указаный период"""
-    # Перевод промежутка отслеживания операций в datetime
+    """Р’РѕР·РІСЂР°С‰Р°РµС‚ РёРЅС„РѕСЂС†РёСЋ Рѕ РєР°СЂС‚Р°С… Рё Рѕ С‚РѕРї С‚СЂР°РЅР·Р°РєС†РёСЏС… Р·Р° СѓРєР°Р·Р°РЅС‹Р№ РїРµСЂРёРѕРґ"""
+    # РїРµСЂРµРІРѕРґ РїСЂРѕРјРµР¶СѓС‚РєР° РѕС‚СЃР»РµР¶РёРІР°РЅРёСЏ РѕРїРµСЂР°С†РёР№ РІ datetime
     date_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
     date_start = date_obj.replace(year=date_obj.year, month=date_obj.month, day=1, hour=0, minute=0, second=0)
+    logger.info(f"Р”РёР°РїР°Р·РѕРЅ С„РёР»СЊС‚СЂР°С†РёРё: {date_start} - {date_obj}")
 
-    # получение данных и перевод дат в datetime
+    # РїРѕР»СѓС‡РµРЅРёРµ РґР°РЅРЅС‹С… Рё РїРµСЂРµРІРѕРґ РґР°С‚ РІ datetime
     operations = read_excel("data/operations.xlsx")
-    operations["Дата операции"] = pd.to_datetime(operations["Дата операции"], format="%d.%m.%Y %H:%M:%S")
+    operations["Р”Р°С‚Р° РѕРїРµСЂР°С†РёРё"] = pd.to_datetime(operations["Р”Р°С‚Р° РѕРїРµСЂР°С†РёРё"], format="%d.%m.%Y %H:%M:%S")
 
-    # фильтрация по искомому временному промежутку
+    # С„РёР»СЊС‚СЂР°С†РёСЏ РїРѕ РёСЃРєРѕРјРѕРјСѓ РІСЂРµРјРµРЅРЅРѕРјСѓ РїСЂРѕРјРµР¶СѓС‚РєСѓ
     date_operations = operations.loc[
-        (operations["Дата операции"] >= date_start) & (operations["Дата операции"] <= date_obj)
-    ]
+        (operations["Р”Р°С‚Р° РѕРїРµСЂР°С†РёРё"] >= date_start) & (operations["Р”Р°С‚Р° РѕРїРµСЂР°С†РёРё"] <= date_obj)
+        ]
+    logger.info(f"РџРѕР»СѓС‡РµРЅ РѕС‚С„РёР»СЊС‚СЂРѕРІР°РЅРЅС‹Р№ DataFrame")
 
-    # Группировка данных по картам
-    grouped_by_cards = date_operations.groupby("Номер карты")
+    # Р“СЂСѓРїРїРёСЂРѕРІРєР° РґР°РЅРЅС‹С… РїРѕ РєР°СЂС‚Р°Рј
+    grouped_by_cards = date_operations.groupby("РќРѕРјРµСЂ РєР°СЂС‚С‹")
+    logger.info(f"Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ СЃРіСЂСѓРїРїРёСЂРѕРІР°РЅС‹ РїРѕ РєР°СЂС‚Р°Рј")
 
     cards = []
     for card_number, group in grouped_by_cards:
         cards.append(
             {
                 "last_digits": card_number[1:],
-                "total_spent": sum(group["Сумма операции с округлением"]),
-                "cashback": sum(group["Бонусы (включая кэшбэк)"]),
+                "total_spent": sum(group["РЎСѓРјРјР° РѕРїРµСЂР°С†РёРё СЃ РѕРєСЂСѓРіР»РµРЅРёРµРј"]),
+                "cashback": sum(group["Р‘РѕРЅСѓСЃС‹ (РІРєР»СЋС‡Р°СЏ РєСЌС€Р±СЌРє)"]),
             }
         )
+    logger.info(f"РџРѕР»СѓС‡РµРЅ СЃРїРёСЃРѕРє СЃР»РѕРІР°СЂРµР№ РєР°СЂС‚ Рё РѕРїРµСЂР°С†РёР№ РїРѕ РЅРёРј")
 
-    top_five_transactions = date_operations.sort_values("Сумма операции с округлением", ascending=False).head()
+    top_five_transactions = date_operations.sort_values("РЎСѓРјРјР° РѕРїРµСЂР°С†РёРё СЃ РѕРєСЂСѓРіР»РµРЅРёРµРј", ascending=False).head()
+    logger.info(f"РџРѕР»СѓС‡РµРЅ DataFrame СЃ РїСЏС‚СЊСЋ СЃР°РјС‹РјРё РґРѕСЂРѕРіРёРјРё РѕРїРµСЂР°С†РёСЏРјРё")
 
     top_transactions = []
     for index, row in top_five_transactions.iterrows():
         top_transactions.append(
             {
-                "date": row["Дата платежа"],
-                "amount": row["Сумма операции с округлением"],
-                "category": row["Категория"],
-                "description": row["Описание"],
+                "date": row["Р”Р°С‚Р° РїР»Р°С‚РµР¶Р°"],
+                "amount": row["РЎСѓРјРјР° РѕРїРµСЂР°С†РёРё СЃ РѕРєСЂСѓРіР»РµРЅРёРµРј"],
+                "category": row["РљР°С‚РµРіРѕСЂРёСЏ"],
+                "description": row["РћРїРёСЃР°РЅРёРµ"],
             }
         )
-
+    logger.info(f"РџРѕР»СѓС‡РµРЅ СЃРїРёСЃРѕРє СЃР»РѕРІР°СЂРµР№ С‚РѕРї С‚СЂР°РЅР·Р°РєС†РёР№ Рё РёС… РёРЅС„РѕСЂРјР°С†РёРё")
+    logger.info(f"Р’РѕР·РІСЂР°С‰РµРЅС‹ СЃРїРёСЃРєРё СЃР»РѕРІР°СЂРµР№")
     return cards, top_transactions
 
 
 def read_excel(path_to_file: str) -> pandas.DataFrame:
-    """Возвращает содержимое Excel - файла"""
+    """Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРѕРґРµСЂР¶РёРјРѕРµ Excel - С„Р°Р№Р»Р°"""
+    logger.info(f"Р’РѕР·РІСЂР°С‰РµРЅРёРµ СЃРѕРґРµСЂР¶РёРјРѕРіРѕ СЌРєСЃРµР»СЊ С„Р°Р№Р»Р° {path_to_file}")
     return pd.read_excel(path_to_file)
 
 
 def get_exchange_rate() -> list:
-    """Возвращает курс валют пользователя"""
+    """Р’РѕР·РІСЂР°С‰Р°РµС‚ РєСѓСЂСЃ РІР°Р»СЋС‚ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ"""
     with open("user_settings.json", "r") as json_file:
         currencies = json.load(json_file)
+    logger.info(f"Р—Р°РїРёСЃСЊ РґР°РЅРЅС‹С… РёР· {json_file}")
     currency_rates: list = []
 
     api_key = os.getenv("API_KEY_APILAYER")
@@ -97,13 +117,15 @@ def get_exchange_rate() -> list:
             'currency': currency,
             'rate': json_to_list['info']['rate']
         })
+        logger.info(f"РћР±СЂР°Р±РѕС‚Р°РЅР° РІР°Р»СЋС‚Р°: {currency}")
     return currency_rates
 
 
 def get_stock_prices() -> list:
-    """Возвращает стоимость акций пользователя"""
+    """Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃС‚РѕРёРјРѕСЃС‚СЊ Р°РєС†РёР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ"""
     with open("user_settings.json", "r") as json_file:
         user_stocks = json.load(json_file)
+    logger.info(f"Р—Р°РїРёСЃСЊ РґР°РЅРЅС‹С… РёР· {json_file}")
 
     stock_prices: list = []
 
@@ -115,5 +137,20 @@ def get_stock_prices() -> list:
             'stock': stock,
             'price': finnhub_client.quote(stock)['c']
         })
+        logger.info(f"РћР±СЂР°Р±РѕС‚Р°РЅР° Р°РєС†РёСЏ: {stock} РїРѕ С†РµРЅРµ {finnhub_client.quote(stock)['c']}")
 
     return stock_prices
+
+
+def to_json(path_to_file, data):
+    """ Р—Р°РїРёСЃС‹РІР°РµС‚ РґР°РЅРЅС‹Рµ РІ JSON С„Р°Р№Р» """
+    with open(path_to_file, "w", encoding="utf-8") as json_file:
+        json.dump(data, json_file, indent=4, ensure_ascii=False)
+
+    logger.info(f"Р—Р°РїРёСЃСЊ РґР°РЅРЅС‹С… РІ {path_to_file}")
+
+
+def to_python_from_json(path):
+    with open(path, "r", encoding="utf-8") as json_file:
+        logger.info(f"РџРѕР»СѓС‡РµРЅРёРµ РґР°РЅРЅС‹С… РёР· {path}")
+        return json.load(json_file)

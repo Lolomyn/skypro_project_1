@@ -1,12 +1,12 @@
-import json
 from dotenv import load_dotenv
 
-from src.utils import get_greeting, get_cards_info, get_exchange_rate, get_stock_prices
+from src.utils import get_greeting, get_cards_info, get_exchange_rate, get_stock_prices, to_json, to_python_from_json
 
 load_dotenv()
 
 
-def get_info(date: str) -> None:
+# ГЛАВНАЯ СТРАНИЦА
+def main_page(date: str) -> dict:
     """Принимает дату в формате: YYYY-MM-DD HH:MM:SS
 
     Возвращает JSON-ответ следующего формата:
@@ -33,8 +33,8 @@ def get_info(date: str) -> None:
         "stock_prices": stock_prices,
     }
 
-    # запись данных в json-файл
-    with open("data/output.json", "w", encoding="utf-8") as json_file:
-        json.dump(full_response, json_file, indent=4, ensure_ascii=False)
+    to_json('data/main_page.json', full_response)
+    response = to_python_from_json('data/main_page.json')
+    return response
 
 
