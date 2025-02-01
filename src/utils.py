@@ -87,12 +87,6 @@ def get_cards_info(date: str) -> tuple:
     return cards, top_transactions
 
 
-def read_excel(path_to_file: str) -> pandas.DataFrame:
-    """Возвращает содержимое Excel - файла"""
-    logger.info(f"Возвращение содержимого эксель файла {path_to_file}")
-    return pd.read_excel(path_to_file)
-
-
 def get_exchange_rate() -> list:
     """Возвращает курс валют пользователя"""
     with open("user_settings.json", "r") as json_file:
@@ -154,3 +148,9 @@ def to_python_from_json(path: str) -> list:
         raise Exception("Файл не найден!")
     finally:
         print("Конец работы.")
+
+
+def read_excel(path_to_file: str) -> pandas.DataFrame:
+    """Возвращает содержимое Excel - файла"""
+    logger.info(f"Возвращение содержимого эксель файла {path_to_file}")
+    return pd.read_excel(path_to_file)
