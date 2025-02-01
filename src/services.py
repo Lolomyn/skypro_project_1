@@ -1,19 +1,25 @@
+from src.reports import report
 from src.utils import read_excel, to_json, to_python_from_json
 
 
 # ПРОСТОЙ ПОИСК
+@report('')
 def simple_search(key_words: str) -> list:
     """Пользователь передает строку для поиска,
     возвращается JSON-ответ со всеми транзакциями,
     содержащими запрос в описании или категории."""
 
-    operations = read_excel("data/operations.xlsx")
+    try:
+        operations = read_excel("data/operations.xlsx")
 
-    search_operations = operations.loc[
-        (operations["Категория"].str.contains(key_words, case=False, na=False))
-        | (operations["Описание"].str.contains(key_words, case=False, na=False))
-    ]
-    search_result = search_operations.to_dict(orient="records")
-    to_json("data/simple_search.json", search_result)
-    response = to_python_from_json("data/simple_search.json")
-    return response
+        search_operations = operations.loc[
+            (operations["Категория"].str.contains(key_words, case=False, na=False))
+            | (operations["Описание"].str.contains(key_words, case=False, na=False))
+        ]
+
+        return search_operations
+    except TypeError as e:
+        print(f"Необходимо передать данные в формате строки.")
+    finally:
+        print('Конец работы блока simple_search.')
+        print('________')

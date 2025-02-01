@@ -104,12 +104,14 @@ def get_exchange_rate() -> list:
 
         response = requests.request("GET", url, headers=headers, data=payload)
 
-        # status_code = response.status_code
+        status_code = response.status_code
         result = response.text
-
-        json_to_list = json.loads(result)
-        currency_rates.append({"currency": currency, "rate": json_to_list["info"]["rate"]})
-        logger.info(f"Обработана валюта: {currency}")
+        if status_code == 200:
+            json_to_list = json.loads(result)
+            currency_rates.append({"currency": currency, "rate": json_to_list["info"]["rate"]})
+            logger.info(f"Обработана валюта: {currency}")
+        else:
+            print(result)
     return currency_rates
 
 
@@ -153,4 +155,7 @@ def to_python_from_json(path: str) -> list:
 def read_excel(path_to_file: str) -> pandas.DataFrame:
     """Возвращает содержимое Excel - файла"""
     logger.info(f"Возвращение содержимого эксель файла {path_to_file}")
-    return pd.read_excel(path_to_file)
+    try:
+        return pd.read_excel(path_to_file)
+    except FileNotFoundError:
+        print(f'Файла по адресу {path_to_file} не существует1')
