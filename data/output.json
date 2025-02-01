@@ -44,6 +44,36 @@
             "description": "Буквоед"
         }
     ],
-    "currency_rates": [],
-    "stock_prices": []
+    "currency_rates": [
+        {
+            "currency": "USD",
+            "rate": 98.568878
+        },
+        {
+            "currency": "EUR",
+            "rate": 102.138579
+        }
+    ],
+    "stock_prices": [
+        {
+            "stock": "AAPL",
+            "price": 236
+        },
+        {
+            "stock": "AMZN",
+            "price": 237.68
+        },
+        {
+            "stock": "GOOGL",
+            "price": 204.02
+        },
+        {
+            "stock": "MSFT",
+            "price": 415.06
+        },
+        {
+            "stock": "TSLA",
+            "price": 404.6
+        }
+    ]
 }

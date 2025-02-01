@@ -1,7 +1,14 @@
 import datetime
 import json
+import os
 
 import pandas as pd
+import requests
+from dotenv import load_dotenv
+import finnhub
+
+
+load_dotenv()
 
 
 def get_info(date: str) -> None:
@@ -95,8 +102,44 @@ def read_excel(path_to_file: str):
 
 
 def get_exchange_rate() -> list:
-    return []
+    with open('user_settings.json', 'r') as json_file:
+        currencies = json.load(json_file)
+    currency_rates = []
+
+    api_key = os.getenv('API_KEY_APILAYER')
+
+    payload = {}
+    headers = {
+        "apikey": api_key
+    }
+
+    for currency in currencies['user_currencies']:
+        url = f"https://api.apilayer.com/exchangerates_data/convert?to=RUB&from={currency}&amount=1"
+
+        response = requests.request("GET", url, headers=headers, data=payload)
+
+        status_code = response.status_code
+        result = response.text
+
+        json_to_list = json.loads(result)
+        currency_rates.append({
+            'currency': currency,
+            'rate': json_to_list['info']['rate']
+        })
+    return currency_rates
 
 
 def get_stock_prices() -> list:
-    return []
+    with open('user_settings.json', 'r') as json_file:
+        user_stocks = json.load(json_file)
+
+    api_key = os.getenv('API_KEY_FINNHUB')
+    finnhub_client = finnhub.Client(api_key=api_key)
+    stock_prices = []
+    for stock in user_stocks['user_stocks']:
+        stock_prices.append({
+            'stock': stock,
+            'price': finnhub_client.quote(stock)['c']
+        })
+
+    return stock_prices
