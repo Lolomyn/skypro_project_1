@@ -18,8 +18,5 @@ def simple_search(key_words: str) -> list:
         ]
 
         return search_operations
-    except TypeError as e:
-        print(f"Необходимо передать данные в формате строки.")
-    finally:
-        print('Конец работы блока simple_search.')
-        print('________')
+    except Exception as e:
+        print(f"Вызвано исключение {e.__class__.__name__}")

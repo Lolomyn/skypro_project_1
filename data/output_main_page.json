@@ -4,45 +4,45 @@
         "cards": [
             {
                 "last_digits": "4556",
-                "total_spent": 1065.0,
-                "cashback": 40
+                "total_spent": 1839.2,
+                "cashback": 60
             },
             {
                 "last_digits": "7197",
-                "total_spent": 15413.5,
-                "cashback": 98
+                "total_spent": 29850.88,
+                "cashback": 553
             }
         ],
         "top_transactions": [
             {
-                "date": "02.05.2020",
-                "amount": 9564.76,
-                "category": "Другое",
-                "description": "ГУП ВЦКП ЖХ"
+                "date": "17.12.2020",
+                "amount": 15000.0,
+                "category": "Автоуслуги",
+                "description": "Kia Odisseya-Spb"
             },
             {
-                "date": "05.05.2020",
-                "amount": 5000.0,
+                "date": "08.12.2020",
+                "amount": 10500.0,
                 "category": "Пополнения",
                 "description": "Перевод с карты"
             },
             {
-                "date": "02.05.2020",
-                "amount": 2155.05,
+                "date": "15.12.2020",
+                "amount": 3360.0,
+                "category": "Сервис",
+                "description": "OOO Sdehk-Alva"
+            },
+            {
+                "date": "08.12.2020",
+                "amount": 2214.7,
                 "category": "ЖКХ",
                 "description": "ЖКУ Дом"
             },
             {
-                "date": "02.05.2020",
-                "amount": 2140.73,
-                "category": "ЖКХ",
-                "description": "ЖКУ Дом"
-            },
-            {
-                "date": "18.05.2020",
-                "amount": 815.0,
-                "category": "Книги",
-                "description": "Буквоед"
+                "date": "16.12.2020",
+                "amount": 860.66,
+                "category": "Бонусы",
+                "description": "Проценты на остаток по счету"
             }
         ],
         "currency_rates": [],

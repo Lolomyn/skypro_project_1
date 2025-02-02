@@ -61,6 +61,3 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
         return filtered_df
     except ValueError:
         print(f'Дата {date} не соответствует требуемому формату представления! YYYY-MM-DD HH:MM:SS')
-    finally:
-        print('Конец работы блока spending_by_category.')
-        print('________')

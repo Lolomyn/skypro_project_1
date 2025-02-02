@@ -3,11 +3,11 @@ import json
 import logging
 import os
 
-from finnhub import FinnhubAPIException
 import finnhub
 import pandas
 import pandas as pd
 import requests
+
 
 logger = logging.getLogger("utils")
 logger.setLevel(logging.DEBUG)
@@ -18,74 +18,88 @@ logger.addHandler(file_handler)
 
 
 def get_greeting(date: str) -> str:
-    """Возвращает приветствие в зависимости от времени суток"""
-    logger.info(f"Получена дата: {date}")
-    date_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-    hour = date_obj.hour  # час
-    logger.info(f"Получена час для вывода приветствия: {hour}")
+    """ Возвращает приветствие в зависимости от времени суток """
+    try:
+        logger.info(f"Получена дата: {date}")
+        date_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+        hour = date_obj.hour  # час
+        logger.info(f"Получен час для вывода приветствия: {hour}")
 
-    if 6 <= hour < 12:
-        logger.info("Возвращенное приветствие: Доброе утро!")
-        return "Доброе утро!"
-    elif 12 <= hour < 18:
-        logger.info("Возвращенное приветствие: Добрый день!")
-        return "Добрый день!"
-    elif 18 <= hour < 24:
-        logger.info("Возвращенное приветствие: Добрый вечер!")
-        return "Добрый вечер!"
-    else:
-        logger.info("Возвращенное приветствие: Доброй ночи!")
-        return "Доброй ночи!"
+        if 6 <= hour < 12:
+            logger.info("Возвращенное приветствие: Доброе утро!")
+            return "Доброе утро!"
+        elif 12 <= hour < 18:
+            logger.info("Возвращенное приветствие: Добрый день!")
+            return "Добрый день!"
+        elif 18 <= hour < 24:
+            logger.info("Возвращенное приветствие: Добрый вечер!")
+            return "Добрый вечер!"
+        else:
+            logger.info("Возвращенное приветствие: Доброй ночи!")
+            return "Доброй ночи!"
+    except ValueError:
+        logger.error(f"Дата {date} не валидна.")
+        print(f'Дата {date} не соответствует требуемому формату представления! YYYY-MM-DD HH:MM:SS')
 
 
 def get_cards_info(date: str) -> tuple:
-    """Возвращает инфорцию о картах и о топ транзакциях за указаный период"""
-    # перевод промежутка отслеживания операций в datetime
-    date_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-    date_start = date_obj.replace(year=date_obj.year, month=date_obj.month, day=1, hour=0, minute=0, second=0)
-    logger.info(f"Диапазон фильтрации: {date_start} - {date_obj}")
+    """Возвращает информацию о картах и о топ транзакциях за указанный период"""
+    try:
+        # перевод промежутка отслеживания операций в datetime
+        date_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
+        date_start = date_obj.replace(year=date_obj.year, month=date_obj.month, day=1, hour=0, minute=0, second=0)
+        logger.info(f"Диапазон фильтрации: {date_start} - {date_obj}")
 
-    # получение данных и перевод дат в datetime
-    operations = read_excel("data/operations.xlsx")
-    operations["Дата операции"] = pd.to_datetime(operations["Дата операции"], format="%d.%m.%Y %H:%M:%S")
+        # получение данных и перевод дат в datetime
+        operations = read_excel("data/operations.xlsx")
+        if operations.empty:
+            logger.error('Переданный файл пуст, возвращаются пустые списки')
+            return [], []
 
-    # фильтрация по искомому временному промежутку
-    date_operations = operations.loc[
-        (operations["Дата операции"] >= date_start) & (operations["Дата операции"] <= date_obj)
-        ]
-    logger.info("Получен отфильтрованный DataFrame")
+        operations["Дата операции"] = pd.to_datetime(operations["Дата операции"], format="%d.%m.%Y %H:%M:%S")
 
-    # Группировка данных по картам
-    grouped_by_cards = date_operations.groupby("Номер карты")
-    logger.info("Данные успешно сгруппированы по картам")
+        # фильтрация по искомому временному промежутку
+        date_operations = operations.loc[
+            (operations["Дата операции"] >= date_start) & (operations["Дата операции"] <= date_obj)]
+        logger.info("Получен отфильтрованный DataFrame")
 
-    cards = []
-    for card_number, group in grouped_by_cards:
-        cards.append(
-            {
-                "last_digits": card_number[1:],
-                "total_spent": sum(group["Сумма операции с округлением"]),
-                "cashback": sum(group["Бонусы (включая кэшбэк)"]),
-            }
-        )
-    logger.info("Получен список словарей карт и операций по ним")
+        # группировка данных по картам
+        grouped_by_cards = date_operations.groupby("Номер карты")
+        logger.info("Данные успешно сгруппированы по картам")
 
-    top_five_transactions = date_operations.sort_values("Сумма операции с округлением", ascending=False).head()
-    logger.info("Получен DataFrame с пятью самыми дорогими операциями")
+        cards = []
+        for card_number, group in grouped_by_cards:
+            cards.append(
+                {
+                    "last_digits": card_number[1:],
+                    "total_spent": sum(group["Сумма операции с округлением"]),
+                    "cashback": sum(group["Бонусы (включая кэшбэк)"]),
+                }
+            )
+        logger.info("Получен список словарей карт и операций по ним")
 
-    top_transactions = []
-    for index, row in top_five_transactions.iterrows():
-        top_transactions.append(
-            {
-                "date": row["Дата платежа"],
-                "amount": row["Сумма операции с округлением"],
-                "category": row["Категория"],
-                "description": row["Описание"],
-            }
-        )
-    logger.info("Получен список словарей топ транзакций и их информации")
-    logger.info("Возвращены списки словарей")
-    return cards, top_transactions
+        top_five_transactions = date_operations.sort_values("Сумма операции с округлением", ascending=False).head()
+        logger.info("Получен DataFrame с пятью самыми дорогими операциями")
+
+        top_transactions = []
+        for index, row in top_five_transactions.iterrows():
+            top_transactions.append(
+                {
+                    "date": row["Дата платежа"],
+                    "amount": row["Сумма операции с округлением"],
+                    "category": row["Категория"],
+                    "description": row["Описание"],
+                }
+            )
+        logger.info("Получен список словарей топ транзакций и их информации")
+        logger.info("Возвращены списки словарей")
+        return cards, top_transactions
+    except ValueError:
+        print('Переданные данные некорректны!')
+        logger.error('Вызвано исключение ValueError')
+    except KeyError:
+        print('Содержимое считываемого файла невалидно!')
+        logger.error('Вызвано исключение KeyError')
 
 
 def get_exchange_rate() -> list:
@@ -100,20 +114,24 @@ def get_exchange_rate() -> list:
     payload: dict = {}
     headers = {"apikey": api_key}
 
-    for currency in currencies["user_currencies"]:
-        url = f"https://api.apilayer.com/exchangerates_data/convert?to=RUB&from={currency}&amount=1"
+    if currencies:
+        for currency in currencies["user_currencies"]:
+            url = f"https://api.apilayer.com/exchangerates_data/convert?to=RUB&from={currency}&amount=1"
 
-        response = requests.request("GET", url, headers=headers, data=payload)
+            response = requests.request("GET", url, headers=headers, data=payload)
 
-        status_code = response.status_code
-        result = response.text
-        if status_code == 200:
-            json_to_list = json.loads(result)
-            currency_rates.append({"currency": currency, "rate": json_to_list["info"]["rate"]})
-            logger.info(f"Обработана валюта: {currency}")
-        else:
-            print(result)
-            logger.error(f'Количество запросов на API превышено')
+            status_code = response.status_code
+            result = response.text
+            if status_code == 200:
+                json_to_list = json.loads(result)
+                currency_rates.append({"currency": currency, "rate": json_to_list["info"]["rate"]})
+                logger.info(f"Обработана валюта: {currency}")
+            else:
+                print(result)
+                logger.error(f'Количество запросов на API превышено')
+    else:
+        return currency_rates
+    logger.info('Возвращен пустой список')
     return currency_rates
 
 
@@ -123,15 +141,16 @@ def get_stock_prices() -> list:
         user_stocks: dict = to_python_from_json("user_settings.json")
         finnhub_client = get_data_from_finnhub()
         stock_prices: list = []
-
-        for stock in user_stocks["user_stocks"]:
-            stock_prices.append({"stock": stock, "price": finnhub_client.quote(stock)["c"]})
-            logger.info(f"Обработана акция: {stock} по цене {finnhub_client.quote(stock)['c']}")
+        if user_stocks:
+            for stock in user_stocks["user_stocks"]:
+                stock_prices.append({"stock": stock, "price": finnhub_client.quote(stock)["c"]})
+                logger.info(f"Обработана акция: {stock} по цене {finnhub_client.quote(stock)['c']}")
 
         return stock_prices
     except Exception as e:
         logger.error(f'Вызвано исключение {e.__class__.__name__}')
         print(f'Exception: {e.__class__.__name__}')
+        return []
 
 
 def get_data_from_finnhub() -> finnhub.client.Client:
