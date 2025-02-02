@@ -6,8 +6,6 @@ from typing import Optional
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
-from src.utils import to_json, to_python_from_json
-
 logger = logging.getLogger("utils")
 logger.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler("logs/utils.log", "w")

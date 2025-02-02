@@ -9,6 +9,6 @@ if __name__ == "__main__":
     simple_search_response = simple_search('аптека')
 
     spending_by_category_response = spending_by_category(read_excel("data/operations.xlsx"),
-                                                         "Супермаркет", "2020-05-20 12:55:32")
+                                                         "Супермаркеты", "2020-05-20 12:55:32")
 
 

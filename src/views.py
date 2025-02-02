@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 
 from src.reports import report
-from src.utils import get_cards_info, get_exchange_rate, get_greeting, get_stock_prices, to_json, to_python_from_json
+from src.utils import get_cards_info, get_exchange_rate, get_greeting, get_stock_prices
 
 load_dotenv()
 

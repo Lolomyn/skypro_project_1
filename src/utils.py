@@ -3,6 +3,7 @@ import json
 import logging
 import os
 
+from finnhub import FinnhubAPIException
 import finnhub
 import pandas
 import pandas as pd
@@ -51,7 +52,7 @@ def get_cards_info(date: str) -> tuple:
     # фильтрация по искомому временному промежутку
     date_operations = operations.loc[
         (operations["Дата операции"] >= date_start) & (operations["Дата операции"] <= date_obj)
-    ]
+        ]
     logger.info("Получен отфильтрованный DataFrame")
 
     # Группировка данных по картам
@@ -112,50 +113,51 @@ def get_exchange_rate() -> list:
             logger.info(f"Обработана валюта: {currency}")
         else:
             print(result)
+            logger.error(f'Количество запросов на API превышено')
     return currency_rates
 
 
 def get_stock_prices() -> list:
     """Возвращает стоимость акций пользователя"""
-    with open("user_settings.json", "r") as json_file:
-        user_stocks = json.load(json_file)
-    logger.info(f"Запись данных из {json_file}")
+    try:
+        user_stocks: dict = to_python_from_json("user_settings.json")
+        finnhub_client = get_data_from_finnhub()
+        stock_prices: list = []
 
-    stock_prices: list = []
+        for stock in user_stocks["user_stocks"]:
+            stock_prices.append({"stock": stock, "price": finnhub_client.quote(stock)["c"]})
+            logger.info(f"Обработана акция: {stock} по цене {finnhub_client.quote(stock)['c']}")
 
+        return stock_prices
+    except Exception as e:
+        logger.error(f'Вызвано исключение {e.__class__.__name__}')
+        print(f'Exception: {e.__class__.__name__}')
+
+
+def get_data_from_finnhub() -> finnhub.client.Client:
+    """ Возвращает ответ от API """
     api_key = os.getenv("API_KEY_FINNHUB")
     finnhub_client = finnhub.Client(api_key=api_key)
-
-    for stock in user_stocks["user_stocks"]:
-        stock_prices.append({"stock": stock, "price": finnhub_client.quote(stock)["c"]})
-        logger.info(f"Обработана акция: {stock} по цене {finnhub_client.quote(stock)['c']}")
-
-    return stock_prices
+    logger.info('Получение ответа от finnhub')
+    return finnhub_client
 
 
-def to_json(path_to_file: str, data: list) -> None:
-    """Записывает данные в JSON файл"""
-    with open(path_to_file, "w", encoding="utf-8") as json_file:
-        json.dump(data, json_file, indent=4, ensure_ascii=False)
-
-    logger.info(f"Запись данных в {path_to_file}")
-
-
-def to_python_from_json(path: str) -> list:
+def to_python_from_json(path: str) -> dict | list:
+    """ Возвращает содержимое JSON файла """
     try:
         with open(path, "r", encoding="utf-8") as json_file:
             logger.info(f"Получение данных из {path}")
             return json.load(json_file)
     except Exception:
+        logger.error(f'Попытка открыть файл {path}. Не успешно.')
         raise Exception("Файл не найден!")
-    finally:
-        print("Конец работы.")
 
 
 def read_excel(path_to_file: str) -> pandas.DataFrame:
     """Возвращает содержимое Excel - файла"""
-    logger.info(f"Возвращение содержимого эксель файла {path_to_file}")
     try:
+        logger.info(f"Возвращение содержимого эксель файла {path_to_file}")
         return pd.read_excel(path_to_file)
     except FileNotFoundError:
-        print(f'Файла по адресу {path_to_file} не существует1')
+        logger.error(f'Попытка открыть файл {path_to_file}. Не успешно.')
+        print(f'Файла по адресу {path_to_file} не существует!')
