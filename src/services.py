@@ -1,25 +1,31 @@
+import logging
+
+import pandas as pd
+
 from src.reports import report
-from src.utils import read_excel, to_json, to_python_from_json
+
+logger = logging.getLogger("services")
+logger.setLevel(logging.DEBUG)
+file_handler = logging.FileHandler("logs/services.log", "w")
+file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
+file_handler.setFormatter(file_formatter)
+logger.addHandler(file_handler)
 
 
 # ПРОСТОЙ ПОИСК
-@report('')
-def simple_search(key_words: str) -> list:
+@report("")
+def simple_search(key_words: str, operations: pd.DataFrame) -> list:
     """Пользователь передает строку для поиска,
     возвращается JSON-ответ со всеми транзакциями,
-    содержащими запрос в описании или категории."""
-
+    содержащими запрос в описании или категории"""
     try:
-        operations = read_excel("data/operations.xlsx")
-
+        logger.info(f"Операции фильтруются по ключевым данным: {key_words}")
         search_operations = operations.loc[
             (operations["Категория"].str.contains(key_words, case=False, na=False))
             | (operations["Описание"].str.contains(key_words, case=False, na=False))
         ]
-
+        logger.info(f"Возвращено строк: {search_operations.shape[0]}")
         return search_operations
-    except TypeError as e:
-        print(f"Необходимо передать данные в формате строки.")
-    finally:
-        print('Конец работы блока simple_search.')
-        print('________')
+    except Exception as e:
+        logger.error(f"Вызвано исключение {e}")
+        print(f"Вызвано исключение {e.__class__.__name__}")
