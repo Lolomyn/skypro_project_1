@@ -1,4 +1,5 @@
 import logging
+
 import pandas as pd
 
 from src.reports import report

@@ -12,7 +12,7 @@ from src.utils import (
     get_greeting,
     get_stock_prices,
     read_excel,
-    to_python_from_json,
+    to_python_from_json
 )
 
 logger = logging.getLogger("utils")

@@ -1,4 +1,3 @@
-import json
 import logging
 from datetime import datetime
 from unittest.mock import Mock, mock_open, patch
