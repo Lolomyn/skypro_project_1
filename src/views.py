@@ -7,6 +7,7 @@ load_dotenv()
 
 
 # ГЛАВНАЯ СТРАНИЦА
+@report("")
 def main_page(date: str) -> list:
     """Принимает дату в формате: YYYY-MM-DD HH:MM:SS
 

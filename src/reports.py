@@ -14,31 +14,37 @@ file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
 
 
-def report(filename):
+def report(filename: str):
+    """Декоратор, который создает или обновляет JSON файл для вывода результата функций."""
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             result = func(*args, **kwargs)
             if filename:
                 if isinstance(result, pd.DataFrame):
-                    result.to_json(filename, indent=4, orient='records', force_ascii=False)
+                    result.to_json(filename, indent=4, orient="records", force_ascii=False)
                 else:
-                    with open(filename, 'w', encoding='utf-8') as file:
+                    with open(filename, "w", encoding="utf-8") as file:
                         json.dump(result, file, ensure_ascii=False, indent=4)
             else:
                 if isinstance(result, pd.DataFrame):
-                    result.to_json(f'data/output_{func.__name__}.json', indent=4, orient='records', force_ascii=False)
+                    result.to_json(f"data/output_{func.__name__}.json", indent=4, orient="records", force_ascii=False)
                 else:
-                    with open(f'data/output_{func.__name__}.json', 'w', encoding='utf-8') as file:
+                    with open(f"data/output_{func.__name__}.json", "w", encoding="utf-8") as file:
                         json.dump(result, file, ensure_ascii=False, indent=4)
+            return result
 
         return wrapper
+
     return decorator
 
 
 # ТРАТЫ ПО КАТЕГОРИЯМ
-@report('')
-def spending_by_category(transactions: pd.DataFrame, category: str, date: Optional[str] = datetime.now()) \
-        -> pd.DataFrame:
+@report("")
+def spending_by_category(
+    transactions: pd.DataFrame, category: str, date: Optional[str] = datetime.now()
+) -> pd.DataFrame:
+    """Возвращает отфильтрованный DataFrame по искомой категории"""
     logger.info(f"Получена дата: {date}")
     try:
         if isinstance(date, datetime):
@@ -57,7 +63,7 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
         ]
         logger.info(f"Просматриваемая категория: {category}")
 
-        filtered_df = date_operations[date_operations['Категория'] == category]
+        filtered_df = date_operations[date_operations["Категория"] == category]
         return filtered_df
     except ValueError:
-        print(f'Дата {date} не соответствует требуемому формату представления! YYYY-MM-DD HH:MM:SS')
+        print(f"Дата {date} не соответствует требуемому формату представления! YYYY-MM-DD HH:MM:SS")

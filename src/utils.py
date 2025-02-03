@@ -8,7 +8,6 @@ import pandas
 import pandas as pd
 import requests
 
-
 logger = logging.getLogger("utils")
 logger.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler("logs/utils.log", "w")
@@ -18,7 +17,7 @@ logger.addHandler(file_handler)
 
 
 def get_greeting(date: str) -> str:
-    """ Возвращает приветствие в зависимости от времени суток """
+    """Возвращает приветствие в зависимости от времени суток"""
     try:
         logger.info(f"Получена дата: {date}")
         date_obj = datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
@@ -39,7 +38,7 @@ def get_greeting(date: str) -> str:
             return "Доброй ночи!"
     except ValueError:
         logger.error(f"Дата {date} не валидна.")
-        print(f'Дата {date} не соответствует требуемому формату представления! YYYY-MM-DD HH:MM:SS')
+        print(f"Дата {date} не соответствует требуемому формату представления! YYYY-MM-DD HH:MM:SS")
 
 
 def get_cards_info(date: str) -> tuple:
@@ -53,14 +52,15 @@ def get_cards_info(date: str) -> tuple:
         # получение данных и перевод дат в datetime
         operations = read_excel("data/operations.xlsx")
         if operations.empty:
-            logger.error('Переданный файл пуст, возвращаются пустые списки')
+            logger.error("Переданный файл пуст, возвращаются пустые списки")
             return [], []
 
         operations["Дата операции"] = pd.to_datetime(operations["Дата операции"], format="%d.%m.%Y %H:%M:%S")
 
         # фильтрация по искомому временному промежутку
         date_operations = operations.loc[
-            (operations["Дата операции"] >= date_start) & (operations["Дата операции"] <= date_obj)]
+            (operations["Дата операции"] >= date_start) & (operations["Дата операции"] <= date_obj)
+        ]
         logger.info("Получен отфильтрованный DataFrame")
 
         # группировка данных по картам
@@ -95,11 +95,11 @@ def get_cards_info(date: str) -> tuple:
         logger.info("Возвращены списки словарей")
         return cards, top_transactions
     except ValueError:
-        print('Переданные данные некорректны!')
-        logger.error('Вызвано исключение ValueError')
+        print("Переданные данные некорректны!")
+        logger.error("Вызвано исключение ValueError")
     except KeyError:
-        print('Содержимое считываемого файла невалидно!')
-        logger.error('Вызвано исключение KeyError')
+        print("Содержимое считываемого файла невалидно!")
+        logger.error("Вызвано исключение KeyError")
 
 
 def get_exchange_rate() -> list:
@@ -128,10 +128,10 @@ def get_exchange_rate() -> list:
                 logger.info(f"Обработана валюта: {currency}")
             else:
                 print(result)
-                logger.error(f'Количество запросов на API превышено')
+                logger.error("Количество запросов на API превышено")
     else:
         return currency_rates
-    logger.info('Возвращен пустой список')
+    logger.info("Возвращен пустой список")
     return currency_rates
 
 
@@ -148,27 +148,27 @@ def get_stock_prices() -> list:
 
         return stock_prices
     except Exception as e:
-        logger.error(f'Вызвано исключение {e.__class__.__name__}')
-        print(f'Exception: {e.__class__.__name__}')
+        logger.error(f"Вызвано исключение {e.__class__.__name__}")
+        print(f"Exception: {e.__class__.__name__}")
         return []
 
 
 def get_data_from_finnhub() -> finnhub.client.Client:
-    """ Возвращает ответ от API """
+    """Возвращает ответ от API"""
     api_key = os.getenv("API_KEY_FINNHUB")
     finnhub_client = finnhub.Client(api_key=api_key)
-    logger.info('Получение ответа от finnhub')
+    logger.info("Получение ответа от finnhub")
     return finnhub_client
 
 
 def to_python_from_json(path: str) -> dict | list:
-    """ Возвращает содержимое JSON файла """
+    """Возвращает содержимое JSON файла"""
     try:
         with open(path, "r", encoding="utf-8") as json_file:
             logger.info(f"Получение данных из {path}")
             return json.load(json_file)
     except Exception:
-        logger.error(f'Попытка открыть файл {path}. Не успешно.')
+        logger.error(f"Попытка открыть файл {path}. Не успешно.")
         raise Exception("Файл не найден!")
 
 
@@ -178,5 +178,5 @@ def read_excel(path_to_file: str) -> pandas.DataFrame:
         logger.info(f"Возвращение содержимого эксель файла {path_to_file}")
         return pd.read_excel(path_to_file)
     except FileNotFoundError:
-        logger.error(f'Попытка открыть файл {path_to_file}. Не успешно.')
-        print(f'Файла по адресу {path_to_file} не существует!')
+        logger.error(f"Попытка открыть файл {path_to_file}. Не успешно.")
+        print(f"Файла по адресу {path_to_file} не существует!")

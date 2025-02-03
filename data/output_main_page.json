@@ -1,71 +1,27 @@
 [
     {
-        "greeting": "Доброй ночи!",
+        "greeting": "Добрый день!",
         "cards": [
             {
-                "last_digits": "4556",
-                "total_spent": 1839.2,
-                "cashback": 60
-            },
-            {
-                "last_digits": "7197",
-                "total_spent": 29850.88,
-                "cashback": 553
+                "last4": "1234",
+                "total_spent": 1000,
+                "cashback": 10
             }
         ],
         "top_transactions": [
             {
-                "date": "17.12.2020",
-                "amount": 15000.0,
-                "category": "Автоуслуги",
-                "description": "Kia Odisseya-Spb"
-            },
-            {
-                "date": "08.12.2020",
-                "amount": 10500.0,
-                "category": "Пополнения",
-                "description": "Перевод с карты"
-            },
-            {
-                "date": "15.12.2020",
-                "amount": 3360.0,
-                "category": "Сервис",
-                "description": "OOO Sdehk-Alva"
-            },
-            {
-                "date": "08.12.2020",
-                "amount": 2214.7,
-                "category": "ЖКХ",
-                "description": "ЖКУ Дом"
-            },
-            {
-                "date": "16.12.2020",
-                "amount": 860.66,
-                "category": "Бонусы",
-                "description": "Проценты на остаток по счету"
+                "transaction": "example",
+                "amount": 500
             }
         ],
-        "currency_rates": [],
+        "currency_rates": {
+            "USD": 75.0,
+            "EUR": 85.0
+        },
         "stock_prices": [
             {
                 "stock": "AAPL",
-                "price": 236
-            },
-            {
-                "stock": "AMZN",
-                "price": 237.68
-            },
-            {
-                "stock": "GOOGL",
-                "price": 204.02
-            },
-            {
-                "stock": "MSFT",
-                "price": 415.06
-            },
-            {
-                "stock": "TSLA",
-                "price": 404.6
+                "price": 150.0
             }
         ]
     }

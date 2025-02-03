@@ -1,19 +1,18 @@
 import json
-import os
+import logging
+from unittest.mock import MagicMock, mock_open, patch
 
 import pandas as pd
 import pytest
-from unittest.mock import patch, Mock, mock_open, MagicMock
-import logging
 
 from src.utils import (
-    read_excel,
-    get_stock_prices,
-    to_python_from_json,
-    get_data_from_finnhub,
-    get_greeting,
     get_cards_info,
+    get_data_from_finnhub,
     get_exchange_rate,
+    get_greeting,
+    get_stock_prices,
+    read_excel,
+    to_python_from_json,
 )
 
 logger = logging.getLogger("utils")
