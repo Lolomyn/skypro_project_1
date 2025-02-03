@@ -12,7 +12,7 @@ from src.utils import (
     get_greeting,
     get_stock_prices,
     read_excel,
-    to_python_from_json
+    to_python_from_json,
 )
 
 logger = logging.getLogger("utils")
@@ -78,9 +78,7 @@ def test_to_python_from_json_valid():
 
     with patch("builtins.open", mock_open(read_data=mock_json_data)), patch.object(logger, "info") as mock_logger_info:
         result = to_python_from_json("path.json")
-
         assert result == {"key": "value"}
-
         mock_logger_info.assert_called_once_with("Получение данных из path.json")
 
 
@@ -179,11 +177,9 @@ def test_get_greeting_invalid_date():
         result = get_greeting("invalid_date")
 
         assert result is None
-
         mock_logger_error.assert_called_once_with("Дата invalid_date не валидна.")
-
         mock_print.assert_called_once_with(
-            "Дата invalid_date не соответствует требуемому формату представления! " "YYYY-MM-DD HH:MM:SS"
+            "Дата invalid_date не соответствует требуемому формату представления!" "YYYY-MM-DD HH:MM:SS"
         )
 
 

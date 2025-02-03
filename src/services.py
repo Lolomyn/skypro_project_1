@@ -18,7 +18,6 @@ def simple_search(key_words: str, operations: pd.DataFrame) -> list:
     """Пользователь передает строку для поиска,
     возвращается JSON-ответ со всеми транзакциями,
     содержащими запрос в описании или категории"""
-
     try:
         logger.info(f"Операции фильтруются по ключевым данным: {key_words}")
         search_operations = operations.loc[
@@ -27,9 +26,6 @@ def simple_search(key_words: str, operations: pd.DataFrame) -> list:
         ]
         logger.info(f"Возвращено строк: {search_operations.shape[0]}")
         return search_operations
-    except ValueError:
-        logger.error("Полученный DataFrame некорректен...")
-        print("Некорректный DataFrame!")
     except Exception as e:
         logger.error(f"Вызвано исключение {e}")
         print(f"Вызвано исключение {e.__class__.__name__}")

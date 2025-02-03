@@ -19,9 +19,7 @@ def test_report_with_dict():
             return {"key": "value"}
 
         result = test_func()
-
         assert result == {"key": "value"}
-
         mock_file.assert_called_once_with("output.json", "w", encoding="utf-8")
 
 
@@ -35,9 +33,7 @@ def test_report_with_dataframe():
         return mock_df
 
     result = test_func()
-
     assert result == mock_df
-
     mock_df.to_json.assert_called_once_with("output.json", indent=4, orient="records", force_ascii=False)
 
 
@@ -50,9 +46,7 @@ def test_report_with_default_filename():
             return {"key": "value"}
 
         result = test_func()
-
         assert result == {"key": "value"}
-
         mock_file.assert_called_once_with("data/output_test_func.json", "w", encoding="utf-8")
 
 
@@ -65,24 +59,22 @@ def test_report_with_list():
             return [1, 2, 3]
 
         result = test_func()
-
         assert result == [1, 2, 3]
-
         mock_file.assert_called_once_with("output.json", "w", encoding="utf-8")
 
 
 # SPENDING_BY_CATEGORY
 def test_spending_by_category_success():
-    data = {
-        "Дата операции": ["01.01.2023 12:00:00", "15.02.2023 14:00:00", "10.03.2023 16:00:00"],
-        "Категория": ["Еда", "Транспорт", "Еда"],
-        "Сумма": [100, 200, 150],
-    }
-    transactions = pd.DataFrame(data)
-
-    test_date = datetime(2023, 3, 10, 16, 0, 0)
-
     with patch.object(logger, "info") as mock_logger_info:
+        data = {
+            "Дата операции": ["01.01.2023 12:00:00", "15.02.2023 14:00:00", "10.03.2023 16:00:00"],
+            "Категория": ["Еда", "Транспорт", "Еда"],
+            "Сумма": [100, 200, 150],
+        }
+        transactions = pd.DataFrame(data)
+
+        test_date = datetime(2023, 3, 10, 16, 0, 0)
+
         result = spending_by_category(transactions, "Еда", test_date)
 
         expected_data = {
@@ -100,15 +92,14 @@ def test_spending_by_category_success():
 
 
 def test_spending_by_category_with_string_date():
-
-    data = {
-        "Дата операции": ["01.01.2023 12:00:00", "15.02.2023 14:00:00", "10.03.2023 16:00:00"],
-        "Категория": ["Еда", "Транспорт", "Еда"],
-        "Сумма": [100, 200, 150],
-    }
-    transactions = pd.DataFrame(data)
-
     with patch.object(logger, "info") as mock_logger_info:
+        data = {
+            "Дата операции": ["01.01.2023 12:00:00", "15.02.2023 14:00:00", "10.03.2023 16:00:00"],
+            "Категория": ["Еда", "Транспорт", "Еда"],
+            "Сумма": [100, 200, 150],
+        }
+        transactions = pd.DataFrame(data)
+
         result = spending_by_category(transactions, "Еда", "2023-03-10 16:00:00")
 
         expected_data = {
@@ -126,35 +117,30 @@ def test_spending_by_category_with_string_date():
 
 
 def test_spending_by_category_invalid_date():
-    data = {
-        "Дата операции": ["01.01.2023 12:00:00", "15.02.2023 14:00:00", "10.03.2023 16:00:00"],
-        "Категория": ["Еда", "Транспорт", "Еда"],
-        "Сумма": [100, 200, 150],
-    }
-    transactions = pd.DataFrame(data)
-
     with patch("builtins.print") as mock_print:
+        data = {
+            "Дата операции": ["01.01.2023 12:00:00", "15.02.2023 14:00:00", "10.03.2023 16:00:00"],
+            "Категория": ["Еда", "Транспорт", "Еда"],
+            "Сумма": [100, 200, 150],
+        }
+        transactions = pd.DataFrame(data)
+
         result = spending_by_category(transactions, "Еда", "invalid_date")
-
         assert result is None
-
         mock_print.assert_called_once_with(
-            "Дата invalid_date не соответствует " "требуемому формату представления! YYYY-MM-DD HH:MM:SS"
+            "Дата invalid_date не соответствует " "требуемому формату представления! " "YYYY-MM-DD HH:MM:SS"
         )
 
 
 def test_spending_by_category_not_found():
-    # Создаем тестовый DataFrame
-    data = {
-        "Дата операции": ["01.01.2023 12:00:00", "15.02.2023 14:00:00", "10.03.2023 16:00:00"],
-        "Категория": ["Еда", "Транспорт", "Еда"],
-        "Сумма": [100, 200, 150],
-    }
-    transactions = pd.DataFrame(data)
-
     with patch.object(logger, "info") as mock_logger_info:
+        data = {
+            "Дата операции": ["01.01.2023 12:00:00", "15.02.2023 14:00:00", "10.03.2023 16:00:00"],
+            "Категория": ["Еда", "Транспорт", "Еда"],
+            "Сумма": [100, 200, 150],
+        }
+        transactions = pd.DataFrame(data)
+
         result = spending_by_category(transactions, "Развлечения")
-
         assert result.empty
-
         mock_logger_info.assert_any_call("Просматриваемая категория: Развлечения")

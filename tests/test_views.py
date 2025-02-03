@@ -13,6 +13,7 @@ def test_main_page_success(fixture_main_page_data):
     ), patch("src.views.get_exchange_rate", return_value={"USD": 75.0, "EUR": 85.0}), patch(
         "src.views.get_stock_prices", return_value=[{"stock": "AAPL", "price": 150.0}]
     ):
+
         result = main_page("")
         expected_result = fixture_main_page_data
         assert result == expected_result

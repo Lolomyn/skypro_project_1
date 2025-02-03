@@ -41,9 +41,7 @@ def report(filename: str):
 
 # ТРАТЫ ПО КАТЕГОРИЯМ
 @report("")
-def spending_by_category(
-    transactions: pd.DataFrame, category: str, date: Optional[str] = datetime.now()
-) -> pd.DataFrame:
+def spending_by_category(trans: pd.DataFrame, category: str, date: Optional[str] = datetime.now()) -> pd.DataFrame:
     """Возвращает отфильтрованный DataFrame по искомой категории"""
     logger.info(f"Получена дата: {date}")
     try:
@@ -55,12 +53,10 @@ def spending_by_category(
             date_start = date_obj - relativedelta(months=3)
         logger.info(f"Получена диапазон фильтрации: {date_start} - {date_obj}")
 
-        transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"], format="%d.%m.%Y %H:%M:%S")
+        trans["Дата операции"] = pd.to_datetime(trans["Дата операции"], format="%d.%m.%Y %H:%M:%S")
 
         # фильтрация по искомому временному промежутку
-        date_operations = transactions.loc[
-            (transactions["Дата операции"] >= date_start) & (transactions["Дата операции"] <= date_obj)
-        ]
+        date_operations = trans.loc[(trans["Дата операции"] >= date_start) & (trans["Дата операции"] <= date_obj)]
         logger.info(f"Просматриваемая категория: {category}")
 
         filtered_df = date_operations[date_operations["Категория"] == category]
